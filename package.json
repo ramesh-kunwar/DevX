@@ -1,0 +1,41 @@
+{
+    "name": "devx",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "nodemon src/server.ts",
+        "format:check": "prettier --check .",
+        "format:fix": "prettier --write",
+        "lint:check": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ramesh-kunwar/DevX.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/ramesh-kunwar/DevX/issues"
+    },
+    "homepage": "https://github.com/ramesh-kunwar/DevX#readme",
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@types/express": "^5.0.5",
+        "@types/node": "^24.10.1",
+        "eslint": "^9.39.1",
+        "nodemon": "^3.1.11",
+        "prettier": "3.6.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.47.0"
+    },
+    "dependencies": {
+        "dotenv": "^17.2.3",
+        "express": "^5.1.0"
+    }
+}
