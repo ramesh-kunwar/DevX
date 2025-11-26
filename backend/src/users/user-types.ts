@@ -6,7 +6,8 @@ export interface Users {
     firstName: string;
     lastName: string;
     emailId: string;
-    age: number;
-    role: RoleType;
-    problemSolved: string[];
+    password: string;
+    age?: number;
+    role?: RoleType;
+    problemSolved?: string[];
 }
