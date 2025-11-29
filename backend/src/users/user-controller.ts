@@ -3,38 +3,36 @@ import { UserService } from "./user-service";
 
 export class UserController {
     constructor(private userService: UserService) {
+        // Bind methods to preserve 'this' context
         this.register = this.register.bind(this);
         this.getUsers = this.getUsers.bind(this);
     }
 
     async register(req: Request, res: Response, next: NextFunction) {
         try {
-            const user = await this.userService.register(req.body);
+            // Service returns safe DTO already
+            const userResponse = await this.userService.register(req.body);
 
             res.status(201).json({
                 success: true,
-                msg: "User Registered Successfully",
-                data: {
-                    id: user._id,
-                    emailId: user.emailId,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                },
+                message: "User registered successfully",
+                data: userResponse, // Already safe, no password
             });
         } catch (error) {
-            return next(error);
+            next(error);
         }
     }
 
     async getUsers(req: Request, res: Response, next: NextFunction) {
         try {
-            const users = await this.userService.getAllUser();
+            const users = await this.userService.getAllUsers();
 
             res.status(200).json({
                 success: true,
-                masg: "User fetched successfully",
+                message: "Users fetched successfully",
                 data: {
                     users,
+                    count: users.length,
                 },
             });
         } catch (error) {

@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
-import { Users } from "./user-types";
+import { UserDocument } from "./user-types";
+
 import { ROLES } from "../common/constants";
 
-const userSchema = new mongoose.Schema<Users>(
+const userSchema = new mongoose.Schema<UserDocument>(
     {
         firstName: {
             type: String,
@@ -44,4 +45,5 @@ const userSchema = new mongoose.Schema<Users>(
     },
 );
 
-export default mongoose.model("User", userSchema);
+// export default mongoose.model<UserDocument>("User", userSchema);
+export default mongoose.model<UserDocument>("User", userSchema);

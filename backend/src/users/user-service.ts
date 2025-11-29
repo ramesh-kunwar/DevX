@@ -1,38 +1,88 @@
 import createHttpError from "http-errors";
-import userModel from "./user-model";
-import { Users } from "./user-types";
 import bcrypt from "bcryptjs";
+import userModel from "./user-model";
+import { RegisterUserDTO, UserResponseDTO, toUserResponse } from "./user-types";
 import { CONFIG } from "../config";
+import { ROLES } from "../common/constants";
 
 export class UserService {
-    async register(data: Users) {
-        const existingUser = await userModel.findOne({ emailId: data.emailId });
+    /**
+     * Register a new user
+     * @param data - User registration data
+     * @returns UserResponseDTO - Safe user data without password
+     * @throws 409 if email already exists
+     * @throws 400 if validation fails
+     */
+    async register(data: RegisterUserDTO): Promise<UserResponseDTO> {
+        // Normalize email
+        const normalizedEmail = data.emailId.toLowerCase().trim();
 
-        // check for existing user
+        // Check if user already exists
+        const existingUser = await userModel.findOne({
+            emailId: normalizedEmail,
+        });
+
         if (existingUser) {
-            const err = createHttpError(409, "Email Already Exists!");
-            throw err;
+            throw createHttpError(409, "Email already exists!");
         }
 
+        // Validate required fields (defense in depth)
         if (!data.emailId || !data.password) {
-            const err = createHttpError(
-                400,
-                "Email and passwords are required.",
-            );
-            throw err;
+            throw createHttpError(400, "Email and password are required.");
         }
-        // hash the password
+
+        // Hash password asynchronously
         const hashedPassword = await bcrypt.hash(
             data.password,
             Number(CONFIG.SALT_ROUND),
         );
 
-        return await userModel.create({
-            ...data,
+        // Create user with normalized and processed data
+        const user = await userModel.create({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            emailId: normalizedEmail,
             password: hashedPassword,
+            // age: data.age,
+            ...(data.age !== undefined && { age: data.age }), // ← FIXED
+
+            role: data.role || ROLES.USER,
+            problemSolved: data.problemSolved || [],
         });
+
+        // Return safe DTO (no password)
+        return toUserResponse(user);
     }
-    async getAllUser() {
-        return await userModel.find();
+
+    /**
+     * Get all users
+     * @returns Array of UserResponseDTO - Safe user data without passwords
+     */
+    async getAllUsers(): Promise<UserResponseDTO[]> {
+        // Note: password is excluded by default (select: false in schema)
+        const users = await userModel.find();
+
+        // Map each user to safe DTO
+        return users.map(toUserResponse);
+    }
+
+    /**
+     * Get user by ID
+     * @param userId - User ID
+     * @returns UserResponseDTO or null
+     */
+    async getUserById(userId: string): Promise<UserResponseDTO | null> {
+        const user = await userModel.findById(userId);
+        return user ? toUserResponse(user) : null;
+    }
+
+    /**
+     * Get user by email
+     * @param emailId - User email
+     * @returns UserResponseDTO or null
+     */
+    async getUserByEmail(emailId: string): Promise<UserResponseDTO | null> {
+        const user = await userModel.findOne({ emailId });
+        return user ? toUserResponse(user) : null;
     }
 }
