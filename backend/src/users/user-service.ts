@@ -1,9 +1,16 @@
 import createHttpError from "http-errors";
 import bcrypt from "bcryptjs";
 import userModel from "./user-model";
-import { RegisterUserDTO, UserResponseDTO, toUserResponse } from "./user-types";
+import {
+    AuthResponseDTO,
+    RegisterUserDTO,
+    UserResponseDTO,
+    toJWTPayload,
+    toUserResponse,
+} from "./user-types";
 import { CONFIG } from "../config";
 import { ROLES } from "../common/constants";
+import { generateAccessToken } from "../common/utils/jwt";
 
 export class UserService {
     /**
@@ -13,7 +20,7 @@ export class UserService {
      * @throws 409 if email already exists
      * @throws 400 if validation fails
      */
-    async register(data: RegisterUserDTO): Promise<UserResponseDTO> {
+    async register(data: RegisterUserDTO): Promise<AuthResponseDTO> {
         // Normalize email
         const normalizedEmail = data.emailId.toLowerCase().trim();
 
@@ -50,8 +57,15 @@ export class UserService {
             problemSolved: data.problemSolved || [],
         });
 
+        // Generate Tokens
+        const payload = toJWTPayload(user);
+        const accessToken = generateAccessToken(payload);
+
         // Return safe DTO (no password)
-        return toUserResponse(user);
+        return {
+            accessToken,
+            user: toUserResponse(user),
+        };
     }
 
     /**

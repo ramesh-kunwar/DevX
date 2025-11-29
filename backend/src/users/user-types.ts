@@ -56,6 +56,16 @@ export interface AuthUserDTO {
     emailId: string;
     role: RoleType;
 }
+// Auth response interface
+export interface AuthResponseDTO {
+    accessToken: string;
+    user: UserResponseDTO;
+}
+export interface JWTPayload {
+    id: string;
+    emailId: string;
+    role: RoleType;
+}
 
 // ==========================================
 // MAPPER FUNCTIONS (Transform data safely)
@@ -65,6 +75,7 @@ export interface AuthUserDTO {
  * Converts a UserDocument to a safe UserResponseDTO
  * Removes sensitive fields like password
  */
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toUserResponse = (user: any): UserResponseDTO => {
     return {
@@ -86,6 +97,15 @@ export const toUserResponse = (user: any): UserResponseDTO => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toAuthUser = (user: any): AuthUserDTO => {
+    return {
+        id: user._id.toString(),
+        emailId: user.emailId,
+        role: user.role || ROLES.USER,
+    };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const toJWTPayload = (user: any): JWTPayload => {
     return {
         id: user._id.toString(),
         emailId: user.emailId,
