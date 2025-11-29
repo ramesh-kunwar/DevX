@@ -4,33 +4,41 @@ import { UserService } from "./user-service";
 export class UserController {
     constructor(private userService: UserService) {
         this.register = this.register.bind(this);
+        this.getUsers = this.getUsers.bind(this);
     }
 
     async register(req: Request, res: Response, next: NextFunction) {
         try {
-            const {
-                firstName,
-                lastName,
-                emailId,
-                password,
-                age,
-                role,
-                problemSolved,
-            } = req.body;
+            const user = await this.userService.register(req.body);
 
-            const user = await this.userService.register({
-                firstName,
-                lastName,
-                emailId,
-                password,
-                age,
-                role,
-                problemSolved,
+            res.status(201).json({
+                success: true,
+                msg: "User Registered Successfully",
+                data: {
+                    id: user._id,
+                    emailId: user.emailId,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                },
             });
-
-            res.json(user);
         } catch (error) {
             return next(error);
+        }
+    }
+
+    async getUsers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const users = await this.userService.getAllUser();
+
+            res.status(200).json({
+                success: true,
+                masg: "User fetched successfully",
+                data: {
+                    users,
+                },
+            });
+        } catch (error) {
+            next(error);
         }
     }
 }

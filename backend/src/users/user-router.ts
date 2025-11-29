@@ -14,6 +14,8 @@ userRouter.post(
     validate(registerUserValidator),
     asyncWrapper(userController.register),
 );
+
+userRouter.get("/", asyncWrapper(userController.getUsers));
 // router.post("/login", login);
 // router.post("/getProfile");
 

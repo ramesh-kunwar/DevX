@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema<Users>(
             type: String,
             required: true,
             trim: true,
+            select: false,
         },
         emailId: {
             type: String,
@@ -20,6 +21,7 @@ const userSchema = new mongoose.Schema<Users>(
             required: true,
             trim: true,
             immutable: true,
+            lowercase: true,
         },
         age: {
             type: Number,
