@@ -6,6 +6,7 @@ export class UserController {
         // Bind methods to preserve 'this' context
         this.register = this.register.bind(this);
         this.getUsers = this.getUsers.bind(this);
+        this.login = this.login.bind(this);
     }
 
     async register(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +23,18 @@ export class UserController {
             next(error);
         }
     }
-
+    async login(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userResponse = await this.userService.login(req.body);
+            res.status(200).json({
+                success: true,
+                message: "User Loggedin Successfully",
+                data: userResponse,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
     async getUsers(req: Request, res: Response, next: NextFunction) {
         try {
             const users = await this.userService.getAllUsers();

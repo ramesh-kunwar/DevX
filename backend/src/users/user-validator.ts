@@ -19,3 +19,17 @@ export const registerUserValidator = z.object({
     problemSolved: z.array(z.string()).optional(),
 });
 export type RegisterUserInput = z.infer<typeof registerUserValidator>;
+
+export const loginUserValidator = z.object({
+    emailId: z
+        .email({ message: "Invalid email address" })
+        .toLowerCase()
+        .trim()
+        .max(255),
+    password: z
+        .string()
+        .min(3, "Password must be atleast 3 characters.")
+        .max(100, "Password must be max 100 characters"),
+});
+
+export type LoginUserInput = z.infer<typeof loginUserValidator>;

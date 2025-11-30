@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import userModel from "./user-model";
 import {
     AuthResponseDTO,
+    LoginUserDTO,
     RegisterUserDTO,
     UserResponseDTO,
     toJWTPayload,
@@ -56,6 +57,40 @@ export class UserService {
             role: data.role || ROLES.USER,
             problemSolved: data.problemSolved || [],
         });
+
+        // Generate Tokens
+        const payload = toJWTPayload(user);
+        const accessToken = generateAccessToken(payload);
+
+        // Return safe DTO (no password)
+        return {
+            accessToken,
+            user: toUserResponse(user),
+        };
+    }
+
+    /****************************************************
+     *          LOGIN
+     *****************************************************/
+
+    async login(data: LoginUserDTO): Promise<AuthResponseDTO> {
+        const normalizedEmail = data.emailId.toLowerCase().trim();
+
+        const user = await userModel
+            .findOne({
+                emailId: normalizedEmail,
+            })
+            .select("+password");
+
+        const isMatchedPassword = await bcrypt.compare(
+            data.password,
+            user?.password as string,
+        );
+
+        if (!isMatchedPassword) {
+            const error = createHttpError(401, "Invalid Credentials.");
+            throw error;
+        }
 
         // Generate Tokens
         const payload = toJWTPayload(user);
