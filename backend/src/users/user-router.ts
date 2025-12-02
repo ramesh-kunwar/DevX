@@ -20,6 +20,7 @@ userRouter.post(
     validate(loginUserValidator),
     asyncWrapper(userController.login),
 );
+userRouter.post("/logout", asyncWrapper(userController.logout));
 userRouter.get("/", asyncWrapper(userController.getUsers));
 // router.post("/login", login);
 // router.post("/getProfile");

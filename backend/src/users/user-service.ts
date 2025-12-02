@@ -103,6 +103,16 @@ export class UserService {
         };
     }
 
+    /****************************************************
+     *              LOGOUT
+     *****************************************************/
+
+    async logout() {
+        return {
+            message: "User logged out successfully",
+        };
+    }
+
     /**
      * Get all users
      * @returns Array of UserResponseDTO - Safe user data without passwords

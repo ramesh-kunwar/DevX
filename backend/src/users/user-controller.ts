@@ -8,6 +8,7 @@ export class UserController {
         this.register = this.register.bind(this);
         this.getUsers = this.getUsers.bind(this);
         this.login = this.login.bind(this);
+        this.logout = this.logout.bind(this);
     }
 
     async register(req: Request, res: Response, next: NextFunction) {
@@ -15,7 +16,7 @@ export class UserController {
             // Service returns safe DTO already
             const userResponse = await this.userService.register(req.body);
 
-            res.cookie("userId", userResponse.user.id, {
+            res.cookie("token", userResponse.accessToken, {
                 httpOnly: true,
                 secure: CONFIG.NODE_ENV === "production",
                 sameSite: "strict",
@@ -34,7 +35,7 @@ export class UserController {
         try {
             const userResponse = await this.userService.login(req.body);
 
-            res.cookie("userId", userResponse.user.id, {
+            res.cookie("token", userResponse.accessToken, {
                 httpOnly: true,
                 secure: CONFIG.NODE_ENV === "production",
                 sameSite: "strict",
@@ -45,6 +46,24 @@ export class UserController {
                 success: true,
                 message: "User Loggedin Successfully",
                 data: userResponse,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            await this.userService.logout();
+            res.clearCookie("token", {
+                httpOnly: true,
+                secure: CONFIG.NODE_ENV === "production",
+                sameSite: "strict",
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Logged out successfully",
             });
         } catch (error) {
             next(error);
