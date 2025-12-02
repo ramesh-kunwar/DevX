@@ -4,10 +4,11 @@ import { UserController } from "./user-controller";
 import { asyncWrapper } from "../common/utils/asyncWrapper";
 import { validate } from "../common/utils/validate";
 import { loginUserValidator, registerUserValidator } from "./user-validator";
+import logger from "../config/logger";
 const userRouter = express.Router();
 
 const userService = new UserService();
-const userController = new UserController(userService);
+const userController = new UserController(userService, logger);
 
 userRouter.post(
     "/register",

@@ -11,7 +11,7 @@ import {
 } from "./user-types";
 import { CONFIG } from "../config";
 import { ROLES } from "../common/constants";
-import { generateAccessToken } from "../common/utils/jwt";
+import { generateAccessToken, verifyAccessToken } from "../common/utils/jwt";
 
 export class UserService {
     /**
@@ -107,7 +107,14 @@ export class UserService {
      *              LOGOUT
      *****************************************************/
 
-    async logout() {
+    async logout(token: string) {
+        if (!token) {
+            const err = createHttpError(401, "Token not found");
+            throw err;
+        }
+
+        verifyAccessToken(token);
+
         return {
             message: "User logged out successfully",
         };
