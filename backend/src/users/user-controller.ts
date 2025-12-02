@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user-service";
 import { CONFIG } from "../config";
 import { Logger } from "winston";
+import { getAuthUser } from "../common/middlewares/authenticate";
 
 export class UserController {
     constructor(
@@ -13,6 +14,8 @@ export class UserController {
         this.getUsers = this.getUsers.bind(this);
         this.login = this.login.bind(this);
         this.logout = this.logout.bind(this);
+        this.getUserProfile = this.getUserProfile.bind(this);
+        this.getUserById = this.getUserById.bind(this);
     }
 
     async register(req: Request, res: Response, next: NextFunction) {
@@ -79,6 +82,21 @@ export class UserController {
             next(error);
         }
     }
+
+    async getUserProfile(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authUser = getAuthUser(req);
+
+            const profile = await this.userService.getUserProfile(authUser);
+            res.status(200).json({
+                success: true,
+                message: "Profile fetched successfully",
+                data: profile,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
     async getUsers(req: Request, res: Response, next: NextFunction) {
         try {
             const users = await this.userService.getAllUsers();
@@ -90,6 +108,22 @@ export class UserController {
                     users,
                     count: users.length,
                 },
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getUserById(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = await this.userService.getUserById(
+                req.params.id as string,
+            );
+
+            res.status(200).json({
+                success: true,
+                msg: "User By Id",
+                userId,
             });
         } catch (error) {
             next(error);

@@ -5,6 +5,11 @@ import { asyncWrapper } from "../common/utils/asyncWrapper";
 import { validate } from "../common/utils/validate";
 import { loginUserValidator, registerUserValidator } from "./user-validator";
 import logger from "../config/logger";
+import {
+    authenticateUser,
+    authorize,
+} from "../common/middlewares/authenticate";
+
 const userRouter = express.Router();
 
 const userService = new UserService();
@@ -23,7 +28,17 @@ userRouter.post(
 );
 userRouter.post("/logout", asyncWrapper(userController.logout));
 userRouter.get("/", asyncWrapper(userController.getUsers));
-// router.post("/login", login);
-// router.post("/getProfile");
+
+userRouter.get(
+    "/profile",
+    authenticateUser,
+    asyncWrapper(userController.getUserProfile),
+);
+userRouter.get(
+    "/profile/:id",
+    authenticateUser,
+    authorize("ADMIN"),
+    userController.getUserById,
+);
 
 export default userRouter;

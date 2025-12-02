@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import userModel from "./user-model";
 import {
     AuthResponseDTO,
+    AuthUserDTO,
     LoginUserDTO,
     RegisterUserDTO,
     UserResponseDTO,
@@ -14,13 +15,6 @@ import { ROLES } from "../common/constants";
 import { generateAccessToken, verifyAccessToken } from "../common/utils/jwt";
 
 export class UserService {
-    /**
-     * Register a new user
-     * @param data - User registration data
-     * @returns UserResponseDTO - Safe user data without password
-     * @throws 409 if email already exists
-     * @throws 400 if validation fails
-     */
     async register(data: RegisterUserDTO): Promise<AuthResponseDTO> {
         // Normalize email
         const normalizedEmail = data.emailId.toLowerCase().trim();
@@ -69,10 +63,6 @@ export class UserService {
         };
     }
 
-    /****************************************************
-     *          LOGIN
-     *****************************************************/
-
     async login(data: LoginUserDTO): Promise<AuthResponseDTO> {
         const normalizedEmail = data.emailId.toLowerCase().trim();
 
@@ -103,10 +93,6 @@ export class UserService {
         };
     }
 
-    /****************************************************
-     *              LOGOUT
-     *****************************************************/
-
     async logout(token: string) {
         if (!token) {
             const err = createHttpError(401, "Token not found");
@@ -120,10 +106,6 @@ export class UserService {
         };
     }
 
-    /**
-     * Get all users
-     * @returns Array of UserResponseDTO - Safe user data without passwords
-     */
     async getAllUsers(): Promise<UserResponseDTO[]> {
         // Note: password is excluded by default (select: false in schema)
         const users = await userModel.find();
@@ -132,21 +114,21 @@ export class UserService {
         return users.map(toUserResponse);
     }
 
-    /**
-     * Get user by ID
-     * @param userId - User ID
-     * @returns UserResponseDTO or null
-     */
+    async getUserProfile(data: AuthUserDTO): Promise<UserResponseDTO> {
+        const user = await userModel.findById(data.id);
+
+        if (!user) {
+            throw createHttpError(404, "User not found");
+        }
+
+        return toUserResponse(user);
+    }
+
     async getUserById(userId: string): Promise<UserResponseDTO | null> {
         const user = await userModel.findById(userId);
         return user ? toUserResponse(user) : null;
     }
 
-    /**
-     * Get user by email
-     * @param emailId - User email
-     * @returns UserResponseDTO or null
-     */
     async getUserByEmail(emailId: string): Promise<UserResponseDTO | null> {
         const user = await userModel.findOne({ emailId });
         return user ? toUserResponse(user) : null;

@@ -67,6 +67,10 @@ export interface JWTPayload {
     role: RoleType;
 }
 
+export interface AuthenticatedRequest extends Request {
+    user: AuthUserDTO;
+}
+
 // ==========================================
 // MAPPER FUNCTIONS (Transform data safely)
 // ==========================================
