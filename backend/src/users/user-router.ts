@@ -26,8 +26,17 @@ userRouter.post(
     validate(loginUserValidator),
     asyncWrapper(userController.login),
 );
-userRouter.post("/logout", asyncWrapper(userController.logout));
-userRouter.get("/", asyncWrapper(userController.getUsers));
+userRouter.post(
+    "/logout",
+    authenticateUser,
+    asyncWrapper(userController.logout),
+);
+userRouter.get(
+    "/",
+    authenticateUser,
+    authorize("ADMIN"),
+    asyncWrapper(userController.getUsers),
+);
 
 userRouter.get(
     "/profile",
@@ -38,7 +47,7 @@ userRouter.get(
     "/profile/:id",
     authenticateUser,
     authorize("ADMIN"),
-    userController.getUserById,
+    asyncWrapper(userController.getUserById),
 );
 
 export default userRouter;

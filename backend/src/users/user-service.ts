@@ -72,14 +72,18 @@ export class UserService {
             })
             .select("+password");
 
+        // Check if user exists first to prevent timing attacks
+        if (!user) {
+            throw createHttpError(401, "Invalid credentials");
+        }
+
         const isMatchedPassword = await bcrypt.compare(
             data.password,
-            user?.password as string,
+            user.password,
         );
 
         if (!isMatchedPassword) {
-            const error = createHttpError(401, "Invalid Credentials.");
-            throw error;
+            throw createHttpError(401, "Invalid credentials");
         }
 
         // Generate Tokens

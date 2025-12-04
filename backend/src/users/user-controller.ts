@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user-service";
-import { CONFIG } from "../config";
 import { Logger } from "winston";
 import { getAuthUser } from "../common/middlewares/authenticate";
+import { COOKIE_OPTIONS } from "../common/constants";
 
 export class UserController {
     constructor(
@@ -23,12 +23,7 @@ export class UserController {
             // Service returns safe DTO already
             const userResponse = await this.userService.register(req.body);
 
-            res.cookie("token", userResponse.accessToken, {
-                httpOnly: true,
-                secure: CONFIG.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-            });
+            res.cookie("token", userResponse.accessToken, COOKIE_OPTIONS);
 
             this.logger.info("User registered successfully.");
             res.status(201).json({
@@ -44,12 +39,7 @@ export class UserController {
         try {
             const userResponse = await this.userService.login(req.body);
 
-            res.cookie("token", userResponse.accessToken, {
-                httpOnly: true,
-                secure: CONFIG.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-            });
+            res.cookie("token", userResponse.accessToken, COOKIE_OPTIONS);
 
             this.logger.info("User logged in successfully");
             res.status(200).json({
@@ -66,11 +56,10 @@ export class UserController {
         try {
             const token = req.cookies.token;
             await this.userService.logout(token);
-            res.clearCookie("token", {
-                httpOnly: true,
-                secure: CONFIG.NODE_ENV === "production",
-                sameSite: "strict",
-            });
+
+            // clearCookie needs same options except maxAge
+            const { maxAge, ...clearCookieOptions } = COOKIE_OPTIONS;
+            res.clearCookie("token", clearCookieOptions);
 
             this.logger.info("User logged out successfully");
 

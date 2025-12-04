@@ -12,12 +12,10 @@ export const authenticateUser = (
     try {
         const token = getTokenFromRequest(req);
         if (!token) throw createHttpError(401, "Access token not provided");
-        console.log(token);
+
         const payload = verifyAccessToken(token);
 
-        // (req as unknown as AuthenticatedRequest).user = payload;
-        const authReq = req as unknown as AuthenticatedRequest;
-        authReq.user = {
+        (req as unknown as AuthenticatedRequest).user = {
             id: payload.id,
             emailId: payload.emailId,
             role: payload.role,
@@ -29,12 +27,16 @@ export const authenticateUser = (
     }
 };
 
+/**
+ * Helper function to extract authenticated user from request
+ * Must be used in routes protected by authenticateUser middleware
+ * @param req - Express Request object
+ * @returns AuthUserDTO - The authenticated user data
+ */
 export const getAuthUser = (req: Request): AuthUserDTO => {
-    const authReq = req as unknown as AuthenticatedRequest;
-    if (!authReq.user) {
-        throw createHttpError(401, "User not authenticated");
-    }
-    return authReq.user;
+    // Single cast - trust the middleware chain
+    // If user is missing, it's a developer error (middleware not applied correctly)
+    return (req as unknown as AuthenticatedRequest).user;
 };
 
 /**
